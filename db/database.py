@@ -67,13 +67,8 @@ class Database:
 
         return self.cursor.rowcount
 
-    def get_contactos(self, usuarioId):
-        query = "SELECT * FROM contacto WHERE usuarioId = %s"
-        self.cursor.execute(query, (usuarioId,))
-
-        contactos = []
-        for row in self.cursor.fetchall():
-            contacto = {
+    def parse_contacto(self, row):
+        return {
                 'id' : row[0],
                 'nombre' : row[1],
                 'telefono' : row[2],
@@ -83,6 +78,41 @@ class Database:
                 'twitter' : row[6],
                 'foto' : row[7],
             }
+
+    def get_contactos(self, usuarioId):
+        query = "SELECT * FROM contacto WHERE usuarioId = %s"
+        self.cursor.execute(query, (usuarioId,))
+
+        contactos = []
+        for row in self.cursor.fetchall():
+            contacto = self.parse_contacto(row)
             contactos.append(contacto)
 
         return contactos
+
+    def detalles_contacto(self, id):
+        query = "SELECT * FROM contacto WHERE id = %s"
+        self.cursor.execute(query, (id,))
+
+        row = self.cursor.fetchone()
+        contacto = {}
+
+        if row:
+            contacto = self.parse_contacto(row)
+        
+        return contacto
+
+    def eliminar_contacto(self, id):
+        query = "DELETE FROM contacto WHERE id = %s"
+        self.cursor.execute(query, (id,))
+        self.connection.commit()
+
+        return self.cursor.rowcount
+
+    def modificar_contacto(self, id, columna, valor):
+        query = f"UPDATE contacto SET { columna } = %s WHERE id = %s"
+        self.cursor.execute(query, (valor, id))
+        self.connection.commit()
+
+        return self.cursor.rowcount
+    

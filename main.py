@@ -48,7 +48,8 @@ def run_server():
                 return jsonify(code = 'error')
 
     @app.route('/api/v1/contactos', methods = ['POST'])
-    def contactos():
+    @app.route('/api/v1/contactos/<int:id>', methods = ['GET', 'DELETE', 'PATCH'])
+    def contactos(id = None):
         if request.method == 'POST' and request.is_json:
             try:
                 data = request.get_json()
@@ -61,7 +62,24 @@ def run_server():
             except Exception as e:
                 print(e)
                 return jsonify(code = 'error')
-            
+        elif id is not None:
+            if request.method == 'GET':
+                return jsonify(db.detalles_contacto(id))
+            elif request.method == 'DELETE':
+                if db.eliminar_contacto(id):
+                    return jsonify(code = 'ok')
+                else:
+                    return jsonify(code = 'error')
+            elif request.method == 'PATCH' and request.is_json:
+                data = request.get_json()
+                columna = data['columna']
+                valor = data['valor']
+                
+                if db.modificar_contacto(id, columna, valor):
+                    return jsonify(code = 'ok')
+                else:
+                    return jsonify(code = 'error')
+
     app.run(debug = True)
 
 if __name__ == '__main__':
