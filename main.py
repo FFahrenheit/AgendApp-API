@@ -7,7 +7,8 @@ def run_server():
     db = Database()
 
     @app.route('/api/v1/usuarios', methods = ['POST'])
-    def usuarios():
+    @app.route('/api/v1/usuarios/<int:id>/contactos', methods = ['GET'])
+    def usuarios(id = None):
         if request.method == 'POST' and request.is_json:
             try:
                 data = request.get_json()
@@ -25,6 +26,9 @@ def run_server():
             except Exception as e:
                 print(e)
                 return jsonify(code = 'error')
+        elif request.method == 'GET' and id is not None:
+            return jsonify(db.get_contactos(id))
+
     @app.route('/api/v1/sesiones', methods = ['POST'])
     def sesiones():
         if request.method == 'POST' and request.is_json:
@@ -37,6 +41,21 @@ def run_server():
 
                 if ok:
                     return jsonify(code = 'ok', id = id, nombre = nombre)
+                else:
+                    return jsonify(code = 'no')
+            except Exception as e:
+                print(e)
+                return jsonify(code = 'error')
+
+    @app.route('/api/v1/contactos', methods = ['POST'])
+    def contactos():
+        if request.method == 'POST' and request.is_json:
+            try:
+                data = request.get_json()
+                print(data)
+
+                if db.agregar_contacto(data):
+                    return jsonify(code = 'ok')
                 else:
                     return jsonify(code = 'no')
             except Exception as e:

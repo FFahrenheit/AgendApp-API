@@ -47,3 +47,42 @@ class Database:
             return id[0], id[1], True
         else:
             return None, None, False
+
+    def agregar_contacto(self, data):
+        nombre = data.get('nombre')
+        telefono = data.get('telefono')
+        correo = data.get('correo', '')
+        facebook = data.get('facebook', '')
+        linkedin = data.get('linkedin', '')
+        twitter = data.get('twitter', '')
+        foto = data.get('foto', '')
+        usuarioId = data.get('usuarioId')
+
+        query = """INSERT INTO \
+        contacto(nombre, telefono, correo, facebook, linkedin, twitter, foto, usuarioId) \
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+
+        self.cursor.execute(query, (nombre, telefono, correo, facebook, linkedin, twitter, foto, usuarioId))
+        self.connection.commit()
+
+        return self.cursor.rowcount
+
+    def get_contactos(self, usuarioId):
+        query = "SELECT * FROM contacto WHERE usuarioId = %s"
+        self.cursor.execute(query, (usuarioId,))
+
+        contactos = []
+        for row in self.cursor.fetchall():
+            contacto = {
+                'id' : row[0],
+                'nombre' : row[1],
+                'telefono' : row[2],
+                'correo' : row[3],
+                'facebook' : row[4],
+                'linkedin' : row[5],
+                'twitter' : row[6],
+                'foto' : row[7],
+            }
+            contactos.append(contacto)
+
+        return contactos
